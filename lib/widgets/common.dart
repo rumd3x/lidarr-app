@@ -238,6 +238,12 @@ class _DemoPoster extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = '${item['artistName'] ?? item['title'] ?? '?'}';
     final big = (height ?? 120) > 100;
+    final initials = title
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .take(2)
+        .map((w) => w[0].toUpperCase())
+        .join();
     final hue = (title.codeUnits.fold<int>(0, (a, b) => a * 31 + b) % 360)
         .toDouble();
     return Container(
@@ -259,13 +265,13 @@ class _DemoPoster extends StatelessWidget {
           : Padding(
               padding: const EdgeInsets.all(6),
               child: Text(
-                big || title.isEmpty ? title : title[0],
+                initials,
                 textAlign: TextAlign.center,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.92),
-                  fontSize: big ? 18 : 22,
+                  fontSize: big ? 44 : 22,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                 ),

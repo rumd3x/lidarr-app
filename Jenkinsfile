@@ -44,7 +44,7 @@ pipeline {
         FORGEJO_HOST = 'forgejo.rumd3x.com'
         FORGEJO_REPO = 'Arr/lidarr-app'  // Forgejo mirrors pushes to GitHub automatically
         GIT_BRANCH_NAME = 'master'  // Branch that receives the version bump commit
-        APP_NAME = 'lidarr'
+        APP_NAME = 'lidarr'  // Artifact file name prefix; Play package is com.rumd3x.lidarr (applicationId in android/app/build.gradle.kts)
         PLAY_STORE_CREDENTIALS_ID = 'play-store-service-account'  // Jenkins credential ID for Play Store JSON key
         ANDROID_KEYSTORE_ID = 'android-upload-keystore'  // Jenkins credential ID for keystore file
         ANDROID_KEYSTORE_PASSWORD_ID = 'android-keystore-password'  // Jenkins credential ID for keystore password

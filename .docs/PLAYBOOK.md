@@ -8,7 +8,7 @@ This repo is the Lidarr port of the Sonarr reference implementation (`../sonarr-
 - **No login, no registration, no database.** Only `shared_preferences` (settings + local cache).
 - First launch asks for **primary URL, secondary (fallback) URL, API key** (`setup_screen.dart`). Failover to the secondary URL happens only on network/timeout errors.
 - Auth via `X-Api-Key` header (the `apikey` query param only for image URLs).
-- API version detected at runtime from `GET /api` → `current` (default `v3`). Sonarr/Radarr are `v3`, Lidarr/Readarr/Prowlarr are `v1`; detection makes the client generic.
+- API version detected at runtime from `GET /api` → `current` (default `v1` here). Sonarr/Radarr are `v3`, Lidarr/Readarr/Prowlarr are `v1`; detection makes the client generic.
 - JSON handled as `Map<String, dynamic>` (`typedef Json`), no generated models. Updates `PUT` back the **full** object.
 - **Demo mode (a `Try demo` button on the Setup screen)** backed by an in-memory fake server (`lib/services/demo_client.dart`, `MockClient`). Required for Google Play review of any app that needs a self-hosted server (see Play prerequisites). Use fictional titles in the sample data.
 - State: `provider` with a single `AppState` (config, cached library, long-running manual search).
@@ -85,7 +85,7 @@ Tips that saved time:
 - **Don't type into the setup form with `adb input text`** (it drops characters). Seed the saved config instead: push an XML named `FlutterSharedPreferences.xml` with `flutter.primary_url`, `flutter.secondary_url`, `flutter.api_key` and copy it with `run-as <package> cp … shared_prefs/`, then relaunch.
 - `adb exec-out screencap -p > file.png` (1080×2400). Tap coordinates are in device pixels (images viewed by tools may be downscaled, so check `adb shell wm size`).
 - **Google Play needs aspect ratio ≤ 2:1.** 1080×2400 is rejected, so crop the emulator border (4 px) and pad the sides with the app's background colour to 1196×2392 (Pillow).
-- Output goes to `.docs/screenshots/NN-name.png` (01 setup, 02 series, 03 series detail, 04 episode, 05 manual search, 06 calendar, 07 activity, 08 wanted, 09 more) and is referenced from `README.md`. Retake them when the UI changes.
+- Output goes to `.docs/screenshots/NN-name.png` (01 setup, 02 artists, 03 artist detail, 04 album, 05 manual search, 06 calendar, 07 activity, 08 wanted, 09 more) and is referenced from `README.md`. Retake them when the UI changes.
 - Delete the mock server and temp files afterwards.
 
 ## 6. Definition of done for a new app
