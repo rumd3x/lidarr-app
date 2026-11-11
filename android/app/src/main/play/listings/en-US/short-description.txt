@@ -1,0 +1,1 @@
+Unofficial companion app to manage your own Lidarr music server from your phone.
