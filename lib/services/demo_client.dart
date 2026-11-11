@@ -14,6 +14,7 @@ class DemoServer {
   final Map<int, List<Map<String, dynamic>>> _tracks = {};
   final List<Map<String, dynamic>> _queue = [];
   final List<Map<String, dynamic>> _history = [];
+  List<Map<String, dynamic>> _manualFiles = [];
   var _nextId = 1000;
 
   DemoServer() {
@@ -288,6 +289,62 @@ class DemoServer {
       });
       i++;
     }
+
+    final blocked = _albums
+        .where(
+          (a) =>
+              DateTime.parse(a['releaseDate'] as String).isBefore(_now) &&
+              !_queue.any((q) => q['albumId'] == a['id']),
+        )
+        .firstOrNull;
+    if (blocked != null) {
+      final name =
+          '${_artistOf(blocked)['artistName']} - ${blocked['title']}'
+          ' (FLAC)';
+      _queue.add({
+        'id': 502,
+        'title': name,
+        'status': 'completed',
+        'trackedDownloadStatus': 'warning',
+        'trackedDownloadState': 'importBlocked',
+        'statusMessages': [
+          {
+            'title': '$name/01 Track.flac',
+            'messages': [
+              'Found matching artist via grab history, but album info could not be verified',
+            ],
+          },
+        ],
+        'downloadId': 'DEMO502',
+        'size': 420000000,
+        'sizeleft': 0,
+        'downloadClient': 'Demo Client',
+        'protocol': 'torrent',
+        'artist': _artistOf(blocked),
+        'album': blocked,
+      });
+      _manualFiles = [
+        {
+          'id': 1,
+          'path': '/downloads/$name/01 Track.flac',
+          'relativePath': '01 Track.flac',
+          'name': '01 Track',
+          'size': 42000000,
+          'artist': null,
+          'album': null,
+          'tracks': <Map<String, dynamic>>[],
+          'quality': {
+            'quality': {'id': 6, 'name': 'FLAC'},
+            'revision': {'version': 1, 'real': 0, 'isRepack': false},
+          },
+          'releaseGroup': 'DEMO',
+          'downloadId': 'DEMO502',
+          'rejections': [
+            {'reason': 'Unknown Artist', 'type': 'permanent'},
+          ],
+        },
+      ];
+    }
   }
 
   Map<String, dynamic> _artistOf(Map<String, dynamic> album) =>
@@ -462,6 +519,8 @@ class DemoServer {
           'totalRecords': list.length,
           'records': list.map(_withRefs).toList(),
         });
+      case '/queue/status':
+        return _json({'totalCount': _queue.length});
       case '/queue':
         return _json({
           'page': 1,
@@ -477,11 +536,42 @@ class DemoServer {
               _albumWithArtist(a),
         ];
         return _json({'page': 1, 'totalRecords': recs.length, 'records': recs});
+      case '/wanted/cutoff':
+        final recs = [
+          for (final a in _albums)
+            if (a['monitored'] == true &&
+                (_tracks[a['id']] ?? const []).any((t) => t['hasFile'] == true))
+              _albumWithArtist(a),
+        ].take(4).toList();
+        return _json({'page': 1, 'totalRecords': recs.length, 'records': recs});
+      case '/manualimport':
+        return _json(_manualFiles);
+      case '/qualitydefinition':
+        return _json([
+          for (final (id, n) in const [
+            (2, 'MP3-192'),
+            (4, 'MP3-320'),
+            (6, 'FLAC'),
+            (7, 'FLAC-24bit'),
+          ])
+            {
+              'id': id,
+              'title': n,
+              'quality': {'id': id, 'name': n},
+            },
+        ]);
       case '/release':
         if (m == 'POST') return _json({});
         await Future<void>.delayed(const Duration(milliseconds: 900));
         return _json(_releases(int.tryParse(q['albumId'] ?? '') ?? 0));
       case '/command':
+        if (body is Map && body['name'] == 'ManualImport') {
+          final ids = {
+            for (final f in body['files'] as List) (f as Map)['downloadId'],
+          };
+          _queue.removeWhere((e) => ids.contains(e['downloadId']));
+          _manualFiles = [];
+        }
         return _json({'id': _nextId++, 'status': 'queued'}, 201);
     }
 

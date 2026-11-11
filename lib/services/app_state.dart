@@ -53,6 +53,39 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  int queueCount = 0;
+
+  /// Refreshes the number of items in the download queue (Activity badge).
+  Future<void> refreshQueueCount() async {
+    final client = api;
+    if (client == null) return;
+    try {
+      final n = await client.queueCount();
+      if (n != queueCount && api == client) {
+        queueCount = n;
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  Future<Map<int, List>>? _imagesIndex;
+
+  /// Artist id -> images, for albums whose embedded artist has no images
+  /// (calendar, wanted). Loaded once from the artist list.
+  Future<Map<int, List>> artistImages() => _imagesIndex ??= api!
+      .artists()
+      .then(
+        (list) => {
+          for (final a in list)
+            if (a['id'] is int && a['images'] is List)
+              a['id'] as int: a['images'] as List,
+        },
+      )
+      .catchError((Object _) {
+        _imagesIndex = null;
+        return <int, List>{};
+      });
+
   final SettingsStore store;
   ServerConfig? config;
   LidarrApi? api;
@@ -69,6 +102,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> setConfig(ServerConfig c) async {
     await store.save(c);
+    _imagesIndex = null;
+    queueCount = 0;
     config = await store.load();
     api?.dispose();
     api = config == null ? null : LidarrApi(config!);
@@ -77,6 +112,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> reset() async {
     await store.clear();
+    _imagesIndex = null;
+    queueCount = 0;
     final p = await SharedPreferences.getInstance();
     await p.remove(_artistCacheKey);
     manualSearches.clear();

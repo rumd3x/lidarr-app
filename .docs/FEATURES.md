@@ -1,6 +1,6 @@
 # Features
 
-Navigation: bottom bar with **Artists · Calendar · Activity · Wanted · More**. Lidarr API is `v1`; main entity mapping from the Sonarr app: series → artist, episode → album (tracks are listed inside the album screen).
+Navigation: bottom bar with **Artists · Calendar · Activity · Wanted · More**. Lidarr API is `v1`; main entity mapping from the Sonarr app: series → artist, episode → album (tracks are listed inside the album screen). The Activity item shows a badge with the number of queue items (hidden when 0); it refreshes every 30 s while the app is in the foreground, on resume, and whenever the queue is loaded (`AppState.refreshQueueCount()`, `GET /queue/status` → `totalCount`).
 
 ## Setup / Connection (`setup_screen.dart`)
 - Official Lidarr logo header, primary URL, secondary URL (fallback), API key (hidden, toggle visibility).
@@ -42,16 +42,29 @@ Opened by tapping an album (artist detail, Calendar, Wanted); the manual-search 
 
 ## Calendar (`calendar_screen.dart`)
 - Album releases from 3 days ago to 30 days ahead, grouped by day ("Today" highlighted).
+- Posters: album covers come from the album's own `images`; if an embedded album/artist has no `images`, `Poster` falls back to the artist's images looked up by id in the artist list (`AppState.artistImages()`, loaded once; `remoteUrl` is used because `/MediaCover` may redirect to the login page).
 - `GET /calendar?includeArtist=true`
 
 ## Activity (`activity_screen.dart`)
-- **Queue:** progress, status, size, time left, download client; remove with optional blocklist.
+- **Queue:** progress, status, size, time left, download client; remove with optional blocklist. It refreshes silently (no spinner) every 10 s while the Activity tab is shown and each time the tab is selected; pull-to-refresh still works.
+- **Manual import button:** a queue item waiting for user action (it has a `downloadId` and `trackedDownloadState` is `importBlocked`, or `importPending`/`importFailed` with `trackedDownloadStatus` `warning`; `needsManualImport()`) shows a `person_search` button left of the "X". It opens the manual import screen and reloads the queue when the import was started.
 - **History:** last 50 events with icon per event type.
-- `GET /queue`, `DELETE /queue/{id}`, `GET /history`
+- Requests send `Cache-Control: no-cache`; `GET /queue` uses `includeUnknownArtistItems=true` so downloads Lidarr could not match to an artist (the ones needing manual import) are listed.
+- `GET /queue`, `DELETE /queue/{id}`, `GET /queue/status` (badge), `GET /history`
+
+## Manual import (`manual_import_screen.dart`)
+Mobile version of the web UI's "Interactive Import", opened from a queue item (see Activity).
+- **Loading** (`LidarrApi.manualImportCandidates`): `GET /manualimport?downloadId=<id>&filterExistingFiles=false` first, so Lidarr matches artist/album like the web UI. If it errors (`Parameter 'path'`) or returns nothing, retry with `folder=<queue item outputPath>` (can't match the artist). Also loads `GET /qualitydefinition` (each `.quality` = choices).
+- **One card per file:** relative path, size, and chips to edit **artist**, **album**, **tracks** (multi-select) and **quality**. A checkbox selects it for import; disabled until it has artist, album, at least one track and a quality. Fully matched files are pre-selected. Lidarr has no per-file language.
+- **Pre-fill** for files without artist: the queue item's `artist`/`album`, else its `artistId` in `GET /artist`, else `GET /parse?title=` (`artist`, `albums`). Changing the artist clears album/tracks and opens the album picker, which then opens the track picker (`GET /album?artistId=`, `GET /track?albumId=`).
+- **Errors:** the queue item's `statusMessages` are shown on the file they refer to (matched by file name against the message `title`, or by position if counts match); only if none, the file's raw `rejections[].reason`.
+- **Import:** `POST /command` `{name: "ManualImport", importMode: "auto", files: [...]}`; each file is `path`, `artistId`, `albumId`, `albumReleaseId` (album's monitored release), `trackIds`, `quality`, `releaseGroup`, `downloadId`, `disableReleaseSwitching`, plus `indexerFlags` when present. Import mode is always `auto`. **Not yet verified against a real Lidarr server** — check the payload against the web UI if it fails.
+- **Demo mode:** one queue item (`id` 502, `importBlocked`) with one unmatched file; the `ManualImport` command removes it.
 
 ## Wanted (`wanted_screen.dart`)
-- Monitored missing albums; search one album (automatic or manual), or all missing from the app bar.
-- `GET /wanted/missing`, `POST /command` (`AlbumSearch`, `MissingAlbumSearch`)
+- Two tabs: **Missing** (monitored albums without files) and **Cutoff unmet** (monitored albums whose file quality is below the profile cutoff).
+- Search one album (automatic or manual), or all of the current tab from the app bar (`MissingAlbumSearch` / `CutoffUnmetAlbumSearch`).
+- `GET /wanted/missing`, `GET /wanted/cutoff`, `POST /command` (`AlbumSearch`, `MissingAlbumSearch`, `CutoffUnmetAlbumSearch`)
 
 ## More (`more_screen.dart`)
 - Lidarr logo card with version and active URL, health warnings/errors, disk space bars.

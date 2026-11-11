@@ -87,6 +87,7 @@ class AlbumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final artist = Json.from((album['artist'] as Map?) ?? {});
+    artist['id'] ??= album['artistId'];
     final date = DateTime.tryParse('${album['releaseDate']}')?.toLocal();
     final st = album['statistics'] as Map? ?? {};
     final have = (st['trackFileCount'] as num?) ?? 0;

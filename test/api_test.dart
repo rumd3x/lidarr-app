@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -93,5 +95,33 @@ void main() {
       'monitored': false,
     });
     expect(updated['monitored'], false);
+  });
+
+  test('manualImport posts a ManualImport command', () async {
+    Map? body;
+    final api = LidarrApi(
+      const ServerConfig(primaryUrl: 'http://p', secondaryUrl: '', apiKey: 'k'),
+      client: MockClient((req) async {
+        if (req.url.path == '/api') {
+          return http.Response('{"current":"v1"}', 200);
+        }
+        body = req.bodyBytes.isEmpty ? null : jsonDecode(req.body) as Map;
+        return http.Response('{}', 201);
+      }),
+    );
+    await api.manualImport([
+      {'path': '/a.flac'},
+    ], mode: 'copy');
+    expect(body!['name'], 'ManualImport');
+    expect(body!['importMode'], 'copy');
+    expect((body!['files'] as List).length, 1);
+  });
+
+  test('demo mode serves queue badge, cutoff and manual import data', () async {
+    final api = LidarrApi(ServerConfig.demo);
+    expect(await api.queueCount(), (await api.queue()).length);
+    expect(await api.cutoffUnmet(), isNotEmpty);
+    expect(await api.manualImportCandidates(downloadId: 'DEMO502'), isNotEmpty);
+    expect(await api.qualityDefinitions(), isNotEmpty);
   });
 }

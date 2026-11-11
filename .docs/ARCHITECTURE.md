@@ -7,15 +7,16 @@ lib/
     settings.dart           ServerConfig + SettingsStore (shared_preferences)
     demo_client.dart        DemoServer: in-memory fake Lidarr (MockClient) behind "Try demo"; ServerConfig.demo selects it
     api.dart                LidarrApi: HTTP client, failover, version detection, endpoints
-    app_state.dart          AppState (ChangeNotifier via provider): config, api, artist cache
-  screens/                  One file per screen (see FEATURES.md); album_detail_screen embeds ManualSearchView
+    app_state.dart          AppState (ChangeNotifier via provider): config, api, artist cache, manual searches, queue count (badge), artist images index
+  screens/                  One file per screen (see FEATURES.md); album_detail_screen embeds ManualSearchView; activity_screen opens manual_import_screen; home_screen polls the queue count; wanted_screen has Missing/Cutoff tabs
   widgets/common.dart       Shared widgets and formatting helpers
-test/api_test.dart          URL normalization, failover, 401 handling, demo mode (MockClient)
+test/api_test.dart          URL normalization, failover, 401 handling, demo mode, ManualImport command (MockClient)
 ```
 
 - Data is handled as `Json` (`Map<String, dynamic>`) — no generated models. Updates send back the full object received from Lidarr, changing only the needed fields.
 - State: `provider` for `AppState`; screens own their local state / `AsyncBody` futures. Long-running work (manual search) lives in `AppState` so it survives navigation.
-- Demo mode: `LidarrApi` builds its HTTP client from `DemoServer().client()` (an `http/testing.dart` `MockClient`, shipped in the `http` package) when `config.isDemo`. `DemoServer` implements the same paths as Lidarr (`/api`, `/system/status`, `/artist`, `/album`, `/track`, `/trackfile`, `/calendar`, `/queue`, `/history`, `/wanted/missing`, `/release`, `/command`, …) with mutable in-memory state, so toggling monitoring, deleting, adding or grabbing works during a session. Dates are relative to now, so the calendar is never empty.
+- Queue badge: `HomeScreen` (bottom nav) polls `AppState.refreshQueueCount()` every 30 s while foregrounded (`WidgetsBindingObserver`); the queue tab refreshes it after each load; the polling pauses only on `paused` (not `inactive`) and restarts on `resumed`; the Activity icon uses `Badge`. `AsyncBodyState.reload(silent: true)` refreshes without a spinner (used by the queue tab, which `HomeScreen` tells when it is active).
+- Demo mode: `LidarrApi` builds its HTTP client from `DemoServer().client()` (an `http/testing.dart` `MockClient`, shipped in the `http` package) when `config.isDemo`. `DemoServer` implements the same paths as Lidarr (`/api`, `/system/status`, `/artist`, `/album`, `/track`, `/trackfile`, `/calendar`, `/queue`, `/queue/status`, `/manualimport`, `/qualitydefinition`, `/history`, `/wanted/missing`, `/wanted/cutoff`, `/release`, `/command`, …) with mutable in-memory state, so toggling monitoring, deleting, adding or grabbing works during a session. Dates are relative to now, so the calendar is never empty.
 - Dependencies: `http`, `shared_preferences`, `provider`, `cached_network_image`, `intl`.
 
 ## Commands

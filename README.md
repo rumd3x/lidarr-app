@@ -33,8 +33,8 @@
 | **Album detail** | Track list and file info, per-album history, manual (interactive) search with long-running background queries |
 | **Add artist** | Lookup by name or `lidarr:MBID`, pick root folder, quality profile, metadata profile and monitor mode |
 | **Calendar** | Upcoming and recent albums grouped by day |
-| **Activity** | Live download queue (remove/blocklist) and history |
-| **Wanted** | Missing albums, search one or all |
+| **Activity** | Live download queue with badge (remove/blocklist, manual import) and history |
+| **Wanted** | Missing and cutoff unmet albums, search one or all |
 | **More** | Server version, health checks, disk space, connection settings |
 
 See [`.docs/FEATURES.md`](.docs/FEATURES.md) for the full list and the API endpoints used.
@@ -52,6 +52,9 @@ See [`.docs/FEATURES.md`](.docs/FEATURES.md) for the full list and the API endpo
   <img src=".docs/screenshots/06-calendar.png" width="22%" alt="Calendar" />
   <img src=".docs/screenshots/07-activity.png" width="22%" alt="Download queue" />
   <img src=".docs/screenshots/08-wanted.png" width="22%" alt="Wanted albums" />
+</p>
+<p align="center">
+  <img src=".docs/screenshots/10-manual-import.png" width="22%" alt="Manual import" />
 </p>
 
 <sub>Captured with demo data; artists, albums and covers are fictional placeholders.</sub>

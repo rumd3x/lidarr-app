@@ -85,8 +85,17 @@ Tips that saved time:
 - **Don't type into the setup form with `adb input text`** (it drops characters). Seed the saved config instead: push an XML named `FlutterSharedPreferences.xml` with `flutter.primary_url`, `flutter.secondary_url`, `flutter.api_key` and copy it with `run-as <package> cp … shared_prefs/`, then relaunch.
 - `adb exec-out screencap -p > file.png` (1080×2400). Tap coordinates are in device pixels (images viewed by tools may be downscaled, so check `adb shell wm size`).
 - **Google Play needs aspect ratio ≤ 2:1.** 1080×2400 is rejected, so crop the emulator border (4 px) and pad the sides with the app's background colour to 1196×2392 (Pillow).
-- Output goes to `.docs/screenshots/NN-name.png` (01 setup, 02 artists, 03 artist detail, 04 album, 05 manual search, 06 calendar, 07 activity, 08 wanted, 09 more) and is referenced from `README.md`. Retake them when the UI changes.
+- Output goes to `.docs/screenshots/NN-name.png` (01 setup, 02 artists, 03 artist detail, 04 album, 05 manual search, 06 calendar, 07 activity, 08 wanted, 09 more, 10 manual import) and is referenced from `README.md`. Retake them when the UI changes.
 - Delete the mock server and temp files afterwards.
+
+## 5c. Queue freshness fix (implemented here first)
+
+Symptom seen on a live server: the Activity queue and its badge stayed at 0 even after pull-to-refresh and only showed the new item after "Disconnect & clear data". Fixes (all together; it's not known which one alone solved it):
+- **Unmatched downloads**: `GET /queue` hides items the server could not match to the library unless asked (`includeUnknownArtistItems=true`). Those are exactly the items that need manual import, so send it in `queue()` in `lib/services/api.dart`.
+- **No HTTP caching**: add `'Cache-Control': 'no-cache'` and `'Pragma': 'no-cache'` to the default request `headers` (guards against a reverse proxy/tunnel returning a stale response).
+- **Live queue tab**: `AsyncBodyState.reload({bool silent = false})` (`lib/widgets/common.dart`) keeps the current content while refreshing and ignores errors when it already has data; it replaces the `FutureBuilder`/`_future` approach with `_data/_error/_loaded` plus a `_token` to drop stale responses. The queue tab (`_QueueTab`, `activity_screen.dart`) takes `active` from `HomeScreen` (`ActivityScreen(active: _index == 2)`, so `_pages` can no longer be `const`), runs a 10 s `Timer.periodic` that does `reload(silent: true)` only while active, and also reloads silently when it becomes active (`didUpdateWidget`).
+- **Badge polling**: in `HomeScreen.didChangeAppLifecycleState` cancel the timer only on `paused` (not on `inactive`, which fires when the notification shade is pulled), restart on `resumed`.
+- Docs to update: `FEATURES.md` (Activity: 10 s refresh, no-cache, unknown items) and `ARCHITECTURE.md` (badge polling, silent reload).
 
 ## 6. Definition of done for a new app
 
