@@ -42,19 +42,19 @@ See [`.docs/FEATURES.md`](.docs/FEATURES.md) for the full list and the API endpo
 ## 🖼️ Screenshots
 
 <p align="center">
-  <img src=".docs/screenshots/01-setup.png" width="22%" alt="First-launch setup" />
-  <img src=".docs/screenshots/02-artists.png" width="22%" alt="Artist library" />
-  <img src=".docs/screenshots/03-artist-detail.png" width="22%" alt="Artist detail" />
-  <img src=".docs/screenshots/04-album.png" width="22%" alt="Album details and tracks" />
+  <img src="assets/images/screenshots/01-setup.png" width="22%" alt="First-launch setup" />
+  <img src="assets/images/screenshots/02-artists.png" width="22%" alt="Artist library" />
+  <img src="assets/images/screenshots/03-artist-detail.png" width="22%" alt="Artist detail" />
+  <img src="assets/images/screenshots/04-album.png" width="22%" alt="Album details and tracks" />
 </p>
 <p align="center">
-  <img src=".docs/screenshots/05-manual-search.png" width="22%" alt="Manual search" />
-  <img src=".docs/screenshots/06-calendar.png" width="22%" alt="Calendar" />
-  <img src=".docs/screenshots/07-activity.png" width="22%" alt="Download queue" />
-  <img src=".docs/screenshots/08-wanted.png" width="22%" alt="Wanted albums" />
+  <img src="assets/images/screenshots/05-manual-search.png" width="22%" alt="Manual search" />
+  <img src="assets/images/screenshots/06-calendar.png" width="22%" alt="Calendar" />
+  <img src="assets/images/screenshots/07-activity.png" width="22%" alt="Download queue" />
+  <img src="assets/images/screenshots/08-wanted.png" width="22%" alt="Wanted albums" />
 </p>
 <p align="center">
-  <img src=".docs/screenshots/10-manual-import.png" width="22%" alt="Manual import" />
+  <img src="assets/images/screenshots/10-manual-import.png" width="22%" alt="Manual import" />
 </p>
 
 <sub>Captured with demo data; artists, albums and covers are fictional placeholders.</sub>
