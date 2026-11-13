@@ -85,4 +85,4 @@ will be changed accordingly.
 12. CONTACT
 
 Questions about this policy can be sent through the project's issue
-tracker at https://forgejo.rumd3x.com/Arr/lidarr-app
+tracker at https://github.com/rumd3x/lidarr-app/issues
