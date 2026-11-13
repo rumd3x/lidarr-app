@@ -35,7 +35,7 @@ Opened by tapping an album (artist detail, Calendar, Wanted); the manual-search 
 
 ## Manual search (`manual_search_screen.dart`)
 - Starts only when the user taps "Search indexers" (never automatically, to avoid needless indexer queries).
-- Interactive release search for an album: lists releases from all indexers with quality, size, age, indexer, seeders/leechers (torrent) or usenet, custom-format score, and rejection reasons.
+- Interactive release search for an album: lists releases from all indexers with quality, size, age, indexer, seeders/leechers (torrent) or usenet (protocol is read from the `protocol` field, which Lidarr sends as `TorrentDownloadProtocol` / `UsenetDownloadProtocol`), custom-format score, and rejection reasons.
 - Rejected releases are hidden by default (toggle); grabbing a rejected one asks for confirmation. Grab sends it to the download client.
 - **Long-running by design:** indexer queries can take minutes. The request uses a 5-minute timeout (`LidarrApi.releaseTimeout`) and runs inside `AppState.manualSearch`, not in the screen, so the user can leave and come back. The album's search button shows a spinner while running and a badge when results are ready. Results are kept in memory until restart/disconnect; "Search again" re-runs.
 - `GET /release?albumId=`, `POST /release` (`guid`, `indexerId`)

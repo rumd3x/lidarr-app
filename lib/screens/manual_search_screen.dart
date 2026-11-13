@@ -211,7 +211,8 @@ class _ReleaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final r = release;
     final rejected = r['rejected'] == true;
-    final torrent = r['protocol'] == 'torrent';
+    // Lidarr returns e.g. "TorrentDownloadProtocol" / "UsenetDownloadProtocol".
+    final torrent = '${r['protocol']}'.toLowerCase().contains('torrent');
     final quality = (r['quality'] as Map?)?['quality']?['name'];
     final languages = (r['languages'] as List? ?? [])
         .map((l) => (l as Map)['name'])

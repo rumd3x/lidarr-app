@@ -283,7 +283,7 @@ class DemoServer {
         'sizeleft': i == 0 ? (size * 0.35).round() : size,
         'timeleft': i == 0 ? '00:04:12' : '00:12:40',
         'downloadClient': 'Demo Client',
-        'protocol': 'torrent',
+        'protocol': 'TorrentDownloadProtocol',
         'artist': _artistOf(a),
         'album': a,
       });
@@ -319,7 +319,7 @@ class DemoServer {
         'size': 420000000,
         'sizeleft': 0,
         'downloadClient': 'Demo Client',
-        'protocol': 'torrent',
+        'protocol': 'TorrentDownloadProtocol',
         'artist': _artistOf(blocked),
         'album': blocked,
       });
@@ -659,7 +659,7 @@ class DemoServer {
         'leechers': r.$4 ~/ 4,
         'age': r.$5,
         'ageHours': r.$5 * 24,
-        'protocol': 'torrent',
+        'protocol': 'TorrentDownloadProtocol',
         'quality': {
           'quality': {'id': 6, 'name': r.$2},
         },

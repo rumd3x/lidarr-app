@@ -42,6 +42,7 @@ Rename screens/endpoints accordingly (e.g. `series_*` → `movie_*`; Radarr has 
 - **Use JDK 17** for Gradle (`JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64`); JDK 25 breaks the Android Gradle build.
 - After builds run `(cd android && ./gradlew --stop)`. The Gradle daemon holds ~4.5 GB and made the emulator freeze ("Emulator not responding").
 - Emulator: AVD `lidarr_pixel` (Pixel 7, `android-35;google_apis;x86_64`), KVM available, no sudo needed. Stable flags: `emulator -avd lidarr_pixel -gpu host -no-snapshot -no-boot-anim`, 2048 MB RAM, 3 cores, animation scales 0.5. adb: `~/Android/Sdk/platform-tools/adb`. From the emulator the host machine is **`10.0.2.2`**.
+- **Always use the `lidarr_pixel` AVD for this app** (`flutter emulators --launch lidarr_pixel`, then `flutter run -d emulator-5554`). Never launch `sonarr_pixel`: it belongs to the Sonarr app and may be in use. Confirm with `adb -s emulator-5554 emu avd name`.
 - **Kotlin DSL**: in `build.gradle.kts` use `import java.util.Properties` (a bare `java.util.Properties` fails with "Unresolved reference: util").
 - `flutter_launcher_icons` is a dev dependency in `pubspec.yaml` (config in `flutter_launcher_icons.yaml`); the Play plugin is configured in Gradle. Nothing else is needed locally.
 
