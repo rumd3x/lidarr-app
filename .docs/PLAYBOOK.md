@@ -98,6 +98,16 @@ Symptom seen on a live server: the Activity queue and its badge stayed at 0 even
 - **Badge polling**: in `HomeScreen.didChangeAppLifecycleState` cancel the timer only on `paused` (not on `inactive`, which fires when the notification shade is pulled), restart on `resumed`.
 - Docs to update: `FEATURES.md` (Activity: 10 s refresh, no-cache, unknown items) and `ARCHITECTURE.md` (badge polling, silent reload).
 
+## 5d. Month-grid Calendar screen (implemented here first)
+
+Replaces the flat "next 30 days" list with a full month calendar. Pure Flutter, **no new dependency**; the whole change lives in `lib/screens/calendar_screen.dart` (+ docs). To port it to another *arr app (Sonarr, Radarr, Readarr…):
+
+1. **Data:** one request covers the whole navigable range: `api.calendar(DateTime(y, m - 12), DateTime(y, m + 13))` (first day of month-12 up to the first day of month+13, exclusive). Group the result by local date (`DateTime(d.year, d.month, d.day)`) into `Map<DateTime, List<Json>>`. Only the date field and the item card change per app: Lidarr uses `releaseDate` + `AlbumCard`; Sonarr uses `airDateUtc` + its episode card; Radarr uses `inCinemas`/`physicalRelease`/`digitalRelease` (pick/expand as needed). The demo server's `/calendar` must honour `start`/`end` (already the case).
+2. **State** (`_CalendarScreenState`): `_today`, `_month` (first day of the shown month), `_selected` (day). Month offset = `(month.year - today.year) * 12 + month.month - today.month`, clamped to `±_maxMonths` (12). Changing month selects day 1, or today when returning to the current month.
+3. **Layout** (inside `AsyncBody`'s builder, so loading/error/refresh stay as before): `Column` → header row (prev arrow · `MMMM yyyy` · next arrow; arrows disabled at the limits) → weekday letters + grid rows → `Divider` → selected-day title ("Today" or `EEEE, MMM d`) → `Expanded` list of that day's items, or the existing `EmptyView('Nothing scheduled')`.
+4. **Grid:** hand-built `Row`s of 7 `Expanded` cells (no package). Leading blanks = `first.weekday % 7` (Sunday-first); rows = `ceil((lead + daysInMonth) / 7)`. Cell: circle; **selected** = `primary` fill, **has items** = `primaryContainer` fill + bold, **today** = primary outline. Horizontal swipe (`GestureDetector.onHorizontalDragEnd`, velocity ±200) also changes month.
+5. **Docs/tests:** update the Calendar section of `FEATURES.md`, retake `06-calendar.png` (select a day that has releases) and keep README in sync. No test change was needed (`api.calendar` is unchanged).
+
 ## 6. Definition of done for a new app
 
 - [ ] `flutter analyze` clean, `flutter test` passes, release APK builds (JDK 17).

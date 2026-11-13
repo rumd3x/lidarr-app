@@ -41,7 +41,7 @@ Opened by tapping an album (artist detail, Calendar, Wanted); the manual-search 
 - `GET /release?albumId=`, `POST /release` (`guid`, `indexerId`)
 
 ## Calendar (`calendar_screen.dart`)
-- Album releases from 3 days ago to 30 days ahead, grouped by day ("Today" highlighted).
+- Full month calendar (Sunday-first) opening on the current month with today selected; prev/next arrows or horizontal swipe navigate up to ±12 months. Days with releases are highlighted; tapping a day selects it. Below the grid, the selected day's releases (or "Nothing scheduled") are listed. One request loads the whole ±12-month range.
 - Posters: album covers come from the album's own `images`; if an embedded album/artist has no `images`, `Poster` falls back to the artist's images looked up by id in the artist list (`AppState.artistImages()`, loaded once; `remoteUrl` is used because `/MediaCover` may redirect to the login page).
 - `GET /calendar?includeArtist=true`
 
