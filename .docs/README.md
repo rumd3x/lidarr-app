@@ -10,4 +10,5 @@
 | [FEATURES.md](FEATURES.md) | Complete feature list, per screen, with the Lidarr endpoints used |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Code layout, data flow, build/test commands |
 | [PLAYBOOK.md](PLAYBOOK.md) | Recipe (inherited from the Sonarr app) to build the same app for other *arr products: env gotchas, CI/CD, Google Play prerequisites, screenshot workflow |
+| [../PRIVACY_POLICY.txt](../PRIVACY_POLICY.txt) | Plain-text privacy policy (Play Console requires a URL). **Update it if the app starts storing/sending new data or requesting new permissions.** |
 | [../assets/images/screenshots/](../assets/images/screenshots/) | Store/README screenshots (1196×2392, ≤2:1 as Google Play requires), captured on the emulator with the in-app demo mode. **Retake them when the UI changes.** |
