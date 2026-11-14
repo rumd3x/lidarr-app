@@ -17,6 +17,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   late final DateTime _today = _dateOnly(DateTime.now());
   late DateTime _month = DateTime(_today.year, _today.month);
   late DateTime _selected = _today;
+  int _dir = 1; // slide direction: 1 = forward (next month), -1 = backward
 
   static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -26,9 +27,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void _goTo(int delta) {
     final off = _offset + delta;
     if (off.abs() > _maxMonths) return;
+    _dir = delta >= 0 ? 1 : -1;
     setState(() {
       _month = DateTime(_today.year, _today.month + off);
       _selected = off == 0 ? _today : _month;
+    });
+  }
+
+  void _goToday() {
+    _dir = _offset > 0 ? -1 : 1;
+    setState(() {
+      _month = DateTime(_today.year, _today.month);
+      _selected = _today;
     });
   }
 
@@ -37,6 +47,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     appBar: AppBar(
       title: const Text('Calendar'),
       actions: [
+        if (_selected != _today)
+          TextButton.icon(
+            icon: const Icon(Icons.today),
+            label: const Text('Today'),
+            onPressed: _goToday,
+          ),
         IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: () => _key.currentState?.reload(),
@@ -126,39 +142,53 @@ class _CalendarScreenState extends State<CalendarScreen> {
         if (v < -200) _goTo(1);
         if (v > 200) _goTo(-1);
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          children: [
-            Row(
+      child: ClipRect(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          transitionBuilder: (child, anim) {
+            final incoming = child.key == ValueKey(_month);
+            final from = Offset((incoming ? 1.0 : -1.0) * _dir, 0);
+            return SlideTransition(
+              position: Tween(begin: from, end: Offset.zero).animate(anim),
+              child: child,
+            );
+          },
+          child: Padding(
+            key: ValueKey(_month),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
               children: [
-                for (final n in names)
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        n,
-                        style: Theme.of(context).textTheme.labelSmall,
+                Row(
+                  children: [
+                    for (final n in names)
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            n,
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ),
                       ),
-                    ),
+                  ],
+                ),
+                for (var r = 0; r < rows; r++)
+                  Row(
+                    children: [
+                      for (var c = 0; c < 7; c++)
+                        Expanded(
+                          child: _cell(
+                            context,
+                            scheme,
+                            r * 7 + c - lead + 1,
+                            count,
+                            byDay,
+                          ),
+                        ),
+                    ],
                   ),
               ],
             ),
-            for (var r = 0; r < rows; r++)
-              Row(
-                children: [
-                  for (var c = 0; c < 7; c++)
-                    Expanded(
-                      child: _cell(
-                        context,
-                        scheme,
-                        r * 7 + c - lead + 1,
-                        count,
-                        byDay,
-                      ),
-                    ),
-                ],
-              ),
-          ],
+          ),
         ),
       ),
     );
